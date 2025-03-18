@@ -1,12 +1,11 @@
 # Filter to selected indicators, detroit census tracts
 
 # load-libraries
-
-library(data.table)
-library(stringr)
-library(dplyr)
-library(naniar)
-library(readr)
+if (!require("data.table")) {install.packages("data.table"); require("data.table")}
+if (!require("dplyr")) {install.packages("dplyr"); require("dplyr")}
+if (!require("readr")) {install.packages("readr"); require("readr")}
+if (!require("stringr")) {install.packages("stringr"); require("stringr")}
+if (!require("naniar")) {install.packages("naniar"); require("naniar")}
 
 
 # import-data-files

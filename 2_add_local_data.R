@@ -2,12 +2,8 @@
 
 
 # load-libraries
-
-library(data.table)
-library(stringr)
-library(dplyr)
-library(naniar)
-library(readr)
+if (!require("dplyr")) {install.packages("dplyr"); require("dplyr")}
+if (!require("readr")) {install.packages("readr"); require("readr")}
 
 
 # read indicator data file derived from CVI_detroit_v5
