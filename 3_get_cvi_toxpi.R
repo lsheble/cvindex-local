@@ -1,12 +1,28 @@
-library(data.table)
-library(BiocGenerics)  # updated R to 4.4 to use latest BioConductor
-library(S4Vectors)   # BioConductor
-library(toxpiR)
-library(dplyr)
-library(ggplot2)
-library(GGally)
-library(grid)
-library(moments)
+# create indexes
+
+
+# Install BiocManager for BioConductor Libraries
+## Note: R >= 4.4 needed for BiocManager v. 3.19, 3.20 ; R >= 4.5 needed for later versions
+
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install(version = "3.20")
+
+# Install, load BiocGenerics and S4Vectors
+
+if (!require("BiocGenerics")) {BiocManager::install("BiocGenerics"); require("BiocGenerics")}
+if (!require("S4Vectors")) {BiocManager::install("S4Vectors"); require("S4Vectors")}
+
+# install, load CRAN libraries
+
+if (!require("data.table")) {install.packages("data.table"); require("data.table")}
+if (!require("toxpiR")) {install.packages("toxpiR"); require("toxpiR")}
+if (!require("dplyr")) {install.packages("dplyr"); require("dplyr")}
+if (!require("ggplot2")) {install.packages("ggplot2"); require("ggplot2")}
+if (!require("GGally")) {install.packages("GGally"); require("GGally")}
+if (!require("grid")) {install.packages("grid"); require("grid")}
+if (!require("moments")) {install.packages("moments"); require("moments")}
+
 
 ######## Data post-processing
 diagdir <- "Diagnostics"
@@ -16,19 +32,24 @@ if (!dir.exists(diagdir)) dir.create(diagdir)
 Tol_muted <- tolower(c('88CCEE', '44AA99', '117733', '332288', 'DDCC77', '999933','CC6677', '882255', 'AA4499', 'DDDDDD'))
 
 # metadata used for labeling, imputation indicator, direction (i.e., adverse or not), etc.
+#
 ## NOTE: rows for local data added manually - in row that corresponds to position in raw indicator data file
+#
 indicators.df<-fread("data-inter/CVI_indicators_current_locals_v1.csv")
 
 # raw indicator values
 cvi.df<-fread("data-inter/det_indicator_data_tract_level_curated_geo_w_local.csv",
               keepLeadingZeros = TRUE,integer64 = "numeric")
+
+# Diagnostics:
+## Distributions, Q-Q Plot of raw values & log of values (if positive)
 pdf(file.path(diagdir,"CheckDist.pdf"))
 for (j in 1:nrow(indicators.df)) {
   par(mfcol=c(2,2))
   y <- cvi.df[[j+6]]
   mtitle <- paste("Row",j,"\n",indicators.df$Parameters[j],"\n",
                   paste(substr(names(summary(y)),1,4),collapse=" | "),"\n",
-                  paste(signif(summary(y),3),collapse=" | "))                    
+                  paste(signif(summary(y),3),collapse=" | "))
   y <- y[!is.na(y)]
   try({qqnorm(y,main="",pch=15,cex=0.2); qqline(y);})
   try(hist(y,main="",xlab="Value"))
@@ -141,14 +162,14 @@ indx <- txpRanks(f.pct.results)<=10 |
   txpRanks(f.pct.results)>=(max(txpRanks(f.pct.results))-9)
 
 # save for use by ToxPi GUI
-cvi.pct.toxpi <- cbind(idcols_gui.df, 
+cvi.pct.toxpi <- cbind(idcols_gui.df,
                        data.table(`ToxPi Score`=f.pct.results@txpScores),
-                       data.table(f.pct.results@txpSliceScores)) 
+                       data.table(f.pct.results@txpSliceScores))
 fwrite(cvi.pct.toxpi,file.path(pctdir,"CVI-pct-allinone.csv"))
 # save for use by ToxPi GIS
 cvi.pct.toxpi.gis <- cbind(data.table(`ToxPi Score`=f.pct.results@txpScores),
-                           idcols_gis.df, 
-                           data.table(f.pct.results@txpSliceScores)) 
+                           idcols_gis.df,
+                           data.table(f.pct.results@txpSliceScores))
 slicenames <- names(f.slices@listData)
 newslicenames <- paste0(slicenames,"!1","!0x",Tol_muted[1:length(slicenames)],"ff")
 setnames(cvi.pct.toxpi.gis,slicenames,newslicenames)
@@ -218,16 +239,16 @@ for (i in 1:length(categories)) {
   f.model.list[[i]]<-fcat.model
   f.pct.results.list[[i]]<-fcat.pct.results
   # save for use by ToxPi GUI
-  cvi.pct.toxpi.cat <- cbind(idcols_gui.df, 
+  cvi.pct.toxpi.cat <- cbind(idcols_gui.df,
                              data.table(`ToxPi Score`=fcat.pct.results@txpScores),
-                             data.table(fcat.pct.results@txpSliceScores)) 
+                             data.table(fcat.pct.results@txpSliceScores))
   fwrite(cvi.pct.toxpi.cat,file.path(pctdir,
                                      paste0("CVI-pct-cat-",
                                             gsub(": ","-",onecat),".csv")))
   # save for use by ToxPi GIS
   cvi.pct.toxpi.cat.gis <- cbind(data.table(`ToxPi Score`=fcat.pct.results@txpScores),
-                                 idcols_gis.df, 
-                                 data.table(fcat.pct.results@txpSliceScores)) 
+                                 idcols_gis.df,
+                                 data.table(fcat.pct.results@txpSliceScores))
   slicenames <- names(fcat.slices@listData)
   newslicenames <- paste0(slicenames,"!1","!0x",Tol_muted[1:length(slicenames)],"ff")
   setnames(cvi.pct.toxpi.cat.gis,slicenames,newslicenames)
@@ -237,7 +258,7 @@ for (i in 1:length(categories)) {
 }
 dev.off()
 
-## Combined 
+## Combined
 fcomb.slices <- TxpSliceList(Baseline.Health=
                                TxpSlice(txpValueNames = categories[1]),
                              Baseline.SocialEconomic=
@@ -272,14 +293,14 @@ indx.pct <- txpRanks(fcomb.pct.results)<=10 |
   txpRanks(fcomb.pct.results)>=(max(txpRanks(fcomb.pct.results))-9)
 
 # save for use by ToxPi GUI
-cvi.pct.toxpi.comb <- cbind(idcols_gui.df, 
+cvi.pct.toxpi.comb <- cbind(idcols_gui.df,
                             data.table(`ToxPi Score`=fcomb.pct.results@txpScores),
-                            data.table(fcomb.pct.results@txpSliceScores)) 
+                            data.table(fcomb.pct.results@txpSliceScores))
 fwrite(cvi.pct.toxpi.comb,file.path(pctdir,paste0("CVI-pct-comb.csv")))
 # save for use by ToxPi GIS
 cvi.pct.toxpi.comb.gis <- cbind(data.table(`ToxPi Score`=fcomb.pct.results@txpScores),
-                                idcols_gis.df, 
-                                data.table(fcomb.pct.results@txpSliceScores)) 
+                                idcols_gis.df,
+                                data.table(fcomb.pct.results@txpSliceScores))
 slicenames <- names(fcomb.slices@listData)
 newslicenames <- paste0(slicenames,"!1","!0x",Tol_muted[1:length(slicenames)],"ff")
 setnames(cvi.pct.toxpi.comb.gis,slicenames,newslicenames)
@@ -296,7 +317,7 @@ print(pp)
 dev.off()
 
 ## Just Baseline
-## Combined 
+## Combined
 fcomb.slices <- TxpSliceList(Baseline.Health=
                                TxpSlice(txpValueNames = categories[1]),
                              Baseline.SocialEconomic=
@@ -325,14 +346,14 @@ indx.pct <- txpRanks(fcomb.pct.results)<=10 |
   txpRanks(fcomb.pct.results)>=(max(txpRanks(fcomb.pct.results))-9)
 
 # save for use by ToxPi GUI
-cvi.pct.toxpi.comb <- cbind(idcols_gui.df, 
+cvi.pct.toxpi.comb <- cbind(idcols_gui.df,
                             data.table(`ToxPi Score`=fcomb.pct.results@txpScores),
-                            data.table(fcomb.pct.results@txpSliceScores)) 
+                            data.table(fcomb.pct.results@txpSliceScores))
 fwrite(cvi.pct.toxpi.comb,file.path(pctdir,paste0("CVI-pct-comb-baseline.csv")))
 # save for use by ToxPi GIS
 cvi.pct.toxpi.comb.gis <- cbind(data.table(`ToxPi Score`=fcomb.pct.results@txpScores),
-                                idcols_gis.df, 
-                                data.table(fcomb.pct.results@txpSliceScores)) 
+                                idcols_gis.df,
+                                data.table(fcomb.pct.results@txpSliceScores))
 slicenames <- names(fcomb.slices@listData)
 newslicenames <- paste0(slicenames,"!1","!0x",Tol_muted[1:length(slicenames)],"ff")
 setnames(cvi.pct.toxpi.comb.gis,slicenames,newslicenames)
@@ -349,7 +370,7 @@ print(pp)
 dev.off()
 
 ## Just Climate
-## Combined 
+## Combined
 fcomb.slices <- TxpSliceList(ClimateChange.Health=
                                TxpSlice(txpValueNames = categories[5]),
                              ClimateChange.SocialEconomic=
@@ -376,14 +397,14 @@ indx.pct <- txpRanks(fcomb.pct.results)<=10 |
   txpRanks(fcomb.pct.results)>=(max(txpRanks(fcomb.pct.results))-9)
 
 # save for use by ToxPi GUI
-cvi.pct.toxpi.comb <- cbind(idcols_gui.df, 
+cvi.pct.toxpi.comb <- cbind(idcols_gui.df,
                             data.table(`ToxPi Score`=fcomb.pct.results@txpScores),
-                            data.table(fcomb.pct.results@txpSliceScores)) 
+                            data.table(fcomb.pct.results@txpSliceScores))
 fwrite(cvi.pct.toxpi.comb,file.path(pctdir,paste0("CVI-pct-comb-climate.csv")))
 # save for use by ToxPi GIS
 cvi.pct.toxpi.comb.gis <- cbind(data.table(`ToxPi Score`=fcomb.pct.results@txpScores),
-                                idcols_gis.df, 
-                                data.table(fcomb.pct.results@txpSliceScores)) 
+                                idcols_gis.df,
+                                data.table(fcomb.pct.results@txpSliceScores))
 slicenames <- names(fcomb.slices@listData)
 newslicenames <- paste0(slicenames,"!1","!0x",Tol_muted[1:length(slicenames)],"ff")
 setnames(cvi.pct.toxpi.comb.gis,slicenames,newslicenames)
