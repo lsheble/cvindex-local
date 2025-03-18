@@ -8,7 +8,7 @@ project_root
 |   0_install_bioconductor_libraries.R  
 |   1_filter_data_v2.R  :  filter original data files to detroit
 |   2_add_local_data.R  :  add data from ODP
-|   3_get_cvi_toxpi.R   :  build index - modified version of tx script
+|   3_get_cvi_toxpi.R   :  build index - modified tx script w orig extra outputs
 │
 └───data-raw
 │   │   CVI_data_current_orig.csv  : curated version of original data
