@@ -16,6 +16,7 @@ if (!dir.exists(diagdir)) dir.create(diagdir)
 Tol_muted <- tolower(c('88CCEE', '44AA99', '117733', '332288', 'DDCC77', '999933','CC6677', '882255', 'AA4499', 'DDDDDD'))
 
 # metadata used for labeling, imputation indicator, direction (i.e., adverse or not), etc.
+## NOTE: rows for local data added manually - in row that corresponds to position in raw indicator data file
 indicators.df<-fread("data-inter/CVI_indicators_current_locals_v1.csv")
 
 # raw indicator values
