@@ -16,11 +16,13 @@ project_root
 |   |   Reference_info_Census-tract-dat_20240702.csv  :  curated metadata dataset
 │   
 └───data-inter
-    │   cvi_blight_measure.csv
-    │   cvi_improve_detroit_measure.csv
-    |   CVI_indicators_current_locals_v1.csv
-    |   det_indicator_data_tract_level_curated_geo_w_local.csv
-    |   det_indicator_data_tract_level_curated_geo.csv
+|   │   cvi_blight_measure.csv
+|   │   cvi_improve_detroit_measure.csv
+|   |   CVI_indicators_current_locals_v1.csv
+|   |   det_indicator_data_tract_level_curated_geo_w_local.csv
+|   |   det_indicator_data_tract_level_curated_geo.csv
+└───Diagnostics
+|   │   CheckDist.pdf
 
 ```
 
