@@ -22,8 +22,17 @@ project_root
 |   |   det_indicator_data_tract_level_curated_geo_w_local.csv
 |   |   det_indicator_data_tract_level_curated_geo.csv
 └───Diagnostics
-|   │   CheckDist.pdf
+|   │   CVI-corr.pdf   : draft correlation graph: needs update
+|   │   CheckDist.pdf  : distribution graphs for each indicator
+└───CVI-pct
+|   │   (Primary ToxPi Scores) 
+|   │   CVI-pct-cat-CC-<category name>.csv: ToxPi scores for each Climate Change category (slices are subcategories) 
+|   │   CVI-pct-cat-<category name>.csv: ToxPi scores for each Baseline category (slices are subcategories)
+|   │   CVI-pct-comb.csv: Overall ToxPi scores (slices are categories, using category-specific ToxPi scores, rescaled to 0-1) 
+|   │   (“Community Baseline” and “Climate Impacts” ToxPi Scores)
+|   │   CVI-pct-comb-baseline.csv: ToxPi Scores for all baseline indicators together 
+|   │   CVI-pct-comb-climate.csv: ToxPi Scores for all climate change indicators together 
 
 ```
 
-Note: Final output files not yet added.
+CVI-pct directory: Directory tree only includes descriptions of files directly used in Detroit index.
