@@ -1,5 +1,5 @@
 # create indexes
-
+# adapted from: https://github.com/wachiuphd/CVI
 
 # Install BiocManager for BioConductor Libraries
 ## Note: R >= 4.4 needed for BiocManager v. 3.19, 3.20 ; R >= 4.5 needed for later versions
@@ -38,6 +38,7 @@ Tol_muted <- tolower(c('88CCEE', '44AA99', '117733', '332288', 'DDCC77', '999933
 indicators.df<-fread("data-inter/CVI_indicators_current_locals_v1.csv")
 
 # raw indicator values
+## Note: 6 cols geo data, 116 cols indicator data (same as length of metadata data, indicators.df)
 cvi.df<-fread("data-inter/det_indicator_data_tract_level_curated_geo_w_local.csv",
               keepLeadingZeros = TRUE,integer64 = "numeric")
 
@@ -59,16 +60,26 @@ for (j in 1:nrow(indicators.df)) {
 }
 dev.off()
 
+####  NAs / Missing values
+## Whether NA's should be replaced with the median value or a 0 is indicated in the
+## 'metadata' dataset (indicators.df), column "Replace NA with median"
+
+# ID columns where NA should be replaced by median ("1")
 nareplcols <- indicators.df$Parameters[indicators.df$`Replace NA with median`==1]
 # View((base::apply(cvi.df,2,FUN=function(x) {sum(is.na(x))}))[nareplcols])
+
+# review: number of NA's in each column where median will replace NA
 print(as.numeric((base::apply(cvi.df,2,FUN=function(x) {sum(is.na(x))}))[nareplcols]))
 
 ##
-# if still NA replace remaining by overall median
+# Replace NA with column median where indicated
 cvi.df[, (nareplcols) := lapply(.SD, function(x) nafill(x, type = "const", fill = median(x, na.rm = TRUE)))
        , .SDcols = nareplcols]
+
+# # review: number of NA's remaining in identified columns after replacement function
 print(as.numeric((base::apply(cvi.df,2,FUN=function(x) {sum(is.na(x))}))[nareplcols]))
 
+# ID columns where NA should be replaced by 0 ("0")
 na0cols <- indicators.df$Parameters[indicators.df$`Replace NA with median`==0]
 
 # other columns replace NA with 0
@@ -82,12 +93,12 @@ cvi.dat.df <- cvi.df[,-(1:6)]
 pdf(file.path(diagdir,"CVI-corr.pdf"))
 cvi.abbr <- cvi.df[,-(1:6)]
 names(cvi.abbr) <- abbreviate(names(cvi.abbr),minlength=8)
-pp<-ggcorr(data=slice_sample(cvi.abbr,n=7000),
+pp<-ggcorr(data=slice_sample(cvi.abbr,n=7000),  # sample does not make sense given there are fewer than 7000 obs
            method=c("pairwise.complete.obs","spearman"))
 print(pp)
 dev.off()
 
-# Absolute value when adverse direction is absolute value
+# Absolute value when adverse direction is NA (vs. 1 or -1)
 na_adverse <- which(is.na(indicators.df$`Adverse Direction`))
 if (length(na_adverse) > 0) {
   cvi.dat.df <- as.data.frame(cvi.dat.df)
@@ -99,14 +110,14 @@ if (length(na_adverse) > 0) {
 # idcols for use in GUI
 idcols_gui.df <- data.table(
   `row#` = 1:nrow(cvi.df),
-  Name=paste0(cvi.df$STATE,", ",cvi.df$County_Name,", ",cvi.df$GEOID.Tract),
+  Name=paste0(cvi.df$GEOID.Tract), #(cvi.df$STATE,", ",cvi.df$County_Name,", ",cvi.df$GEOID.Tract),
   FIPS=cvi.df$GEOID.Tract,
   Source=cvi.df$LatLong
 )
 
 idcols_gis.df <- data.table(
   FIPS=cvi.df$GEOID.Tract,
-  Name=paste0(cvi.df$STATE,", ",cvi.df$County_Name,", ",cvi.df$GEOID.Tract),
+  Name=paste0(cvi.df$GEOID.Tract), # (cvi.df$STATE,", ",cvi.df$County_Name,", ",cvi.df$GEOID.Tract),
   Source=cvi.df$LatLong
 )
 
