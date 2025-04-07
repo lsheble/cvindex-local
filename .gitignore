@@ -1,3 +1,6 @@
+# retired scripts
+retired/*
+
 # History files
 .Rhistory
 .Rapp.history
